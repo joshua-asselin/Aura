@@ -1,1 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Orbitron:wght@600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #09090e 0%, #12121e 50%, #0d0b18 100%);
+            --aura-glow: #8b5cf6;
+            --aura-hover: #a78bfa;
+            --aura-gold: #ffd700;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --text-main: #ffffff;
+            --text-sub: rgba(255, 255, 255, 0.7);
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            width: 100vw;
+            display: flex;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* --- LOGIN CARD --- */
+        .login-card {
+            padding: 48px 36px;
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #a78bfa 0%, #e879f9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(167, 139, 250, 0.4);
+        }
+
+        .login-card p {
+            color: var(--text-sub);
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--aura-glow) 0%, #c084fc 100%);
+            color: #ffffff;
+            border: none;
+            padding: 14px 28px;
+            font-weight: 700;
+            font-size: 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(167, 139, 250, 0.6);
+        }
+
+        /* --- UNAUTHORIZED CARD --- */
+        .unauthorized-card {
+            display: none;
+            padding: 40px;
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+            margin: auto;
+        }
+
+        .unauthorized-card h2 { color: #ef4444; margin-bottom: 15px; font-size: 1.5rem; }
+        .unauthorized-card p { color: var(--text-sub); margin-bottom: 25px; font-size: 0.95rem; }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid var(--glass-border);
+            padding: 12px 24px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-cancel:hover { background: rgba(255, 255, 255, 0.2); }
+
+        /* --- MAIN DASHBOARD APP --- */
+        .app-container {
+            display: none;
+            width: 100vw;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        .navbar {
+            height: 75px;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(10, 10, 18, 0.6);
+            backdrop-filter: blur(15px);
+        }
+
+        .brand {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            background: linear-gradient(135deg, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-badge {
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .dashboard-content {
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+
+        /* --- DASHBOARD WIDGETS --- */
+        .aura-hero-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .aura-glow-effect {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: var(--aura-glow);
+            filter: blur(90px);
+            border-radius: 50%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .aura-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-sub);
+            margin-bottom: 10px;
+            z-index: 1;
+        }
+
+        .aura-counter {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(167, 139, 250, 0.6);
+            margin-bottom: 20px;
+            z-index: 1;
+        }
+
+        .btn-claim {
+            width: 100%;
+            padding: 16px;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            font-weight: 800;
+            z-index: 1;
+        }
+
+        .actions-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-header {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .quests-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .quest-card {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 15px;
+            transition: border-color 0.2s ease;
+        }
+
+        .quest-card:hover {
+            border-color: rgba(167, 139, 250, 0.4);
+        }
+
+        .quest-info h4 { font-size: 1rem; margin-bottom: 5px; }
+        .quest-info p { font-size: 0.85rem; color: var(--text-sub); }
+
+        .quest-reward {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: var(--aura-gold);
+            font-weight: 700;
+        }
+
+        .btn-action {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 850px) {
+            .dashboard-content { grid-template-columns: 1fr; }
+            .quests-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- GOOGLE LOGIN -->
+    <div id="login-container" class="login-card glass-card">
+        <h1>✨ AURA</h1>
+        <p>Connect to claim, track, and amplify your Aura.</p>
+        <button class="btn-primary" style="width: 100%;" onclick="connectViaGoogleOAuth()">Sign in with Google</button>
+    </div>
+
+    <!-- ACCESS RESTRICTED -->
+    <div id="unauthorized-container" class="unauthorized-card glass-card">
+        <h2>Access Restricted 🔒</h2>
+        <p>You do not have permission to enter Aura yet. Contact an admin to get whitelisted.</p>
+        <button class="btn-cancel" style="width: 100%;" onclick="logoutUser()">Sign Out</button>
+    </div>
+
+    <!-- MAIN DASHBOARD APP -->
+    <div id="chat-app" class="app-container">
+        <header class="navbar">
+            <div class="brand">✨ AURA</div>
+            <div class="user-profile">
+                <span id="user-display" class="user-badge">...</span>
+                <button class="btn-cancel" style="padding: 6px 12px; font-size: 0.85rem;" onclick="logoutUser()">Logout</button>
+            </div>
+        </header>
+
+        <main class="dashboard-content">
+            <!-- LEFT COLUMN: AURA HERO COUNTER -->
+            <div class="glass-card aura-hero-card">
+                <div class="aura-glow-effect"></div>
+                <div class="aura-title">Current Aura Balance</div>
+                <div class="aura-counter" id="aura-points">0</div>
+                <button class="btn-primary btn-claim" onclick="gainAura(100)">⚡ Claim +100 Aura</button>
+            </div>
+
+            <!-- RIGHT COLUMN: QUESTS & ACTIONS -->
+            <div class="actions-panel">
+                <div class="panel-header">Aura Tasks & Quests</div>
+                <div class="quests-grid">
+                    <div class="glass-card quest-card">
+                        <div class="quest-info">
+                            <h4>Daily Presence</h4>
+                            <p>Check in daily to build your streak balance.</p>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="quest-reward">+50 Aura</span>
+                            <button class="btn-action" onclick="gainAura(50)">Claim</button>
+                        </div>
+                    </div>
+
+                    <div class="glass-card quest-card">
+                        <div class="quest-info">
+                            <h4>Vibe Check</h4>
+                            <p>Pass the daily aura vibe validation test.</p>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="quest-reward">+250 Aura</span>
+                            <button class="btn-action" onclick="gainAura(250)">Validate</button>
+                        </div>
+                    </div>
+
+                    <div class="glass-card quest-card">
+                        <div class="quest-info">
+                            <h4>Mega Aura Surge</h4>
+                            <p>Trigger a temporary aura multiplier burst.</p>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="quest-reward">+500 Aura</span>
+                            <button class="btn-action" onclick="gainAura(500)">Surge</button>
+                        </div>
+                    </div>
+
+                    <div class="glass-card quest-card">
+                        <div class="quest-info">
+                            <h4>Ultimateflex</h4>
+                            <p>Showcase maximum aura power to the grid.</p>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="quest-reward">+1,000 Aura</span>
+                            <button class="btn-action" onclick="gainAura(1000)">Flex</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Exact Supabase setup retained from original application
+        const supabaseUrl = "https://ofgviuznpzkjsgyhwtsr.supabase.co";
+        const supabaseKey = "sb_publishable_f7zRYLYJ5Jc30eDfv77S8g_AdLmn6eT";
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        let currentEmail = "";
+        let currentName = "";
+        let userAuraScore = 0;
+
+        function connectViaGoogleOAuth() {
+            supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.origin + window.location.pathname }
+            });
+        }
+
+        async function logoutUser() {
+            await supabaseClient.auth.signOut();
+            window.location.reload();
+        }
+
+        async function checkAccessPermission(email) {
+            const { data } = await supabaseClient
+                .from('chat_access')
+                .select('user_email');
+
+            if (!data || data.length === 0) return true;
+            return data.some(row => row.user_email.toLowerCase() === email);
+        }
+
+        async function setupUser(user) {
+            currentEmail = user.email.toLowerCase().trim();
+            currentName = user.user_metadata?.full_name || currentEmail.split('@')[0];
+
+            const isAllowed = await checkAccessPermission(currentEmail);
+
+            document.getElementById('login-container').style.display = 'none';
+
+            if (!isAllowed) {
+                document.getElementById('unauthorized-container').style.display = 'block';
+                document.getElementById('chat-app').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('unauthorized-container').style.display = 'none';
+            document.getElementById('chat-app').style.display = 'flex';
+            
+            const userDisplay = document.getElementById('user-display');
+            userDisplay.innerText = `✨ ${currentName}`;
+
+            // Load persistent state or default values
+            const storedAura = localStorage.getItem(`aura_${currentEmail}`) || 1000;
+            userAuraScore = parseInt(storedAura, 10);
+            updateAuraDisplay();
+        }
+
+        function gainAura(amount) {
+            userAuraScore += amount;
+            localStorage.setItem(`aura_${currentEmail}`, userAuraScore);
+            updateAuraDisplay();
+
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 80,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#8b5cf6', '#a78bfa', '#ffd700', '#ffffff']
+                });
+            }
+        }
+
+        function updateAuraDisplay() {
+            const el = document.getElementById('aura-points');
+            if (el) {
+                el.innerText = userAuraScore.toLocaleString();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                setupUser(session.user);
+            }
+        });
+    </script>
+</body>
+</html>
